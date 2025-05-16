@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Enhancer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Prompt Enhancer ✨</h1>
+            <p class="tagline">Turn simple ideas into powerful, professional AI prompts.</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <label for="basicPromptInput">Your Basic Prompt:</label>
+                <textarea id="basicPromptInput" rows="4" placeholder="e.g., write a story about a brave knight"></textarea>
+
+                <label for="aiModelSelector">Target AI Model:</label>
+                <select id="aiModelSelector">
+                    <option value="general">General Purpose</option>
+                    <option value="chatgpt">ChatGPT (OpenAI)</option>
+                    <option value="claude">Claude (Anthropic)</option>
+                    <option value="perplexity">Perplexity</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="gemini">Gemini (Google)</option>
+                    <option value="code">Code Generation</option>
+                </select>
+
+                <label>Enhancement Options:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="addRole" checked> Add Role/Persona</label>
+                    <label><input type="checkbox" id="addContext" checked> Add Context</label>
+                    <label><input type="checkbox" id="addFormat" checked> Specify Output Format</label>
+                    <label><input type="checkbox" id="addTone" checked> Suggest Tone</label>
+                    <label><input type="checkbox" id="addConstraints" checked> Add Constraints</label>
+                    <label><input type="checkbox" id="addExamples"> Add Example Placeholder</label>
+                    <label><input type="checkbox" id="addStepByStep"> Encourage Step-by-Step</label>
+                </div>
+
+                <div id="customRoleDiv" style="display: none; margin-top:10px;">
+                    <label for="customRoleInput">Custom Role (if 'Add Role' is checked):</label>
+                    <input type="text" id="customRoleInput" placeholder="e.g., expert travel blogger">
+                </div>
+
+                <button id="enhanceButton">✨ Enhance Prompt</button>
+            </section>
+
+            <section class="output-section">
+                <label for="enhancedPromptOutput">Your Enhanced Prompt:</label>
+                <textarea id="enhancedPromptOutput" rows="10" readonly placeholder="Your enhanced prompt will appear here..."></textarea>
+                <button id="copyButton">📋 Copy to Clipboard</button>
+                <p id="copyFeedback" class="copy-feedback"></p>
+            </section>
+
+            <section class="tips-section">
+                <h3>💡 How It Works & Tips</h3>
+                <p>This tool adds common prompt engineering structures to your basic idea. You'll still need to fill in the specifics in bracketed sections like <strong>[이렇게 하세요]</strong>.</p>
+                <ul>
+                    <li><strong>Be Specific:</strong> The more detail you provide in the placeholders, the better the AI's response.</li>
+                    <li><strong>Iterate:</strong> Try different enhanced prompts. See what works best for your target AI.</li>
+                    <li><strong>Model Differences:</strong> Some models respond better to certain structures.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 AI Prompt Enhancer. Built for learning and sharing.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
