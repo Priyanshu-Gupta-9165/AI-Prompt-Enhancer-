@@ -1,164 +1,330 @@
+/**
+ * AI Prompt Enhancer - Script
+ * Transforms simple prompts into professional AI-ready prompts
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
-    const basicPromptInput = document.getElementById('basicPromptInput');
-    const aiModelSelector = document.getElementById('aiModelSelector');
-    const enhanceButton = document.getElementById('enhanceButton');
-    const enhancedPromptOutput = document.getElementById('enhancedPromptOutput');
-    const copyButton = document.getElementById('copyButton');
-    const copyFeedback = document.getElementById('copyFeedback');
+    // ========================================
+    // DOM Elements
+    // ========================================
+    const elements = {
+        // Theme
+        themeToggle: document.getElementById('themeToggle'),
 
-    // Enhancement option checkboxes
-    const addRoleCheckbox = document.getElementById('addRole');
-    const addContextCheckbox = document.getElementById('addContext');
-    const addFormatCheckbox = document.getElementById('addFormat');
-    const addToneCheckbox = document.getElementById('addTone');
-    const addConstraintsCheckbox = document.getElementById('addConstraints');
-    const addExamplesCheckbox = document.getElementById('addExamples');
-    const addStepByStepCheckbox = document.getElementById('addStepByStep');
+        // Input
+        basicPromptInput: document.getElementById('basicPromptInput'),
+        aiModelSelector: document.getElementById('aiModelSelector'),
+        charCount: document.getElementById('charCount'),
 
-    // Custom Role input
-    const customRoleDiv = document.getElementById('customRoleDiv');
-    const customRoleInput = document.getElementById('customRoleInput');
+        // Options
+        addRole: document.getElementById('addRole'),
+        addContext: document.getElementById('addContext'),
+        addFormat: document.getElementById('addFormat'),
+        addTone: document.getElementById('addTone'),
+        addConstraints: document.getElementById('addConstraints'),
+        addExamples: document.getElementById('addExamples'),
+        addStepByStep: document.getElementById('addStepByStep'),
 
-    // Show/hide custom role input based on checkbox
-    addRoleCheckbox.addEventListener('change', function() {
-        customRoleDiv.style.display = this.checked ? 'block' : 'none';
-    });
-    // Initialize visibility
-    customRoleDiv.style.display = addRoleCheckbox.checked ? 'block' : 'none';
+        // Custom Role
+        customRoleDiv: document.getElementById('customRoleDiv'),
+        customRoleInput: document.getElementById('customRoleInput'),
 
+        // Buttons
+        enhanceButton: document.getElementById('enhanceButton'),
+        copyButton: document.getElementById('copyButton'),
+        clearButton: document.getElementById('clearButton'),
 
-    enhanceButton.addEventListener('click', () => {
-        const basicPrompt = basicPromptInput.value.trim();
-        const targetModel = aiModelSelector.value;
-        const customRoleText = customRoleInput.value.trim();
+        // Output
+        enhancedPromptOutput: document.getElementById('enhancedPromptOutput'),
+        copyFeedback: document.getElementById('copyFeedback')
+    };
+
+    // ========================================
+    // Theme Management
+    // ========================================
+    const initTheme = () => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    };
+
+    const updateThemeIcon = (theme) => {
+        const moonIcon = document.getElementById('themeIconMoon');
+        const sunIcon = document.getElementById('themeIconSun');
+
+        if (theme === 'dark') {
+            moonIcon.classList.add('hidden');
+            sunIcon.classList.remove('hidden');
+        } else {
+            moonIcon.classList.remove('hidden');
+            sunIcon.classList.add('hidden');
+        }
+    };
+
+    const toggleTheme = () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    };
+
+    // ========================================
+    // Character Counter
+    // ========================================
+    const updateCharCount = () => {
+        const count = elements.basicPromptInput.value.length;
+        elements.charCount.textContent = count.toLocaleString();
+    };
+
+    // ========================================
+    // Option Chips Management
+    // ========================================
+    const initOptionChips = () => {
+        const chips = document.querySelectorAll('.option-chip');
+
+        chips.forEach(chip => {
+            const checkbox = chip.querySelector('input[type="checkbox"]');
+
+            // Set initial state
+            if (checkbox.checked) {
+                chip.classList.add('active');
+            }
+
+            // Toggle on click
+            chip.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    checkbox.checked = !checkbox.checked;
+                }
+                chip.classList.toggle('active', checkbox.checked);
+
+                // Handle custom role visibility
+                if (checkbox.id === 'addRole') {
+                    toggleCustomRole(checkbox.checked);
+                }
+            });
+        });
+    };
+
+    const toggleCustomRole = (show) => {
+        if (show) {
+            elements.customRoleDiv.classList.add('visible');
+        } else {
+            elements.customRoleDiv.classList.remove('visible');
+        }
+    };
+
+    // ========================================
+    // Prompt Enhancement Logic
+    // ========================================
+    const enhancePrompt = () => {
+        const basicPrompt = elements.basicPromptInput.value.trim();
+        const targetModel = elements.aiModelSelector.value;
+        const customRole = elements.customRoleInput.value.trim();
 
         if (!basicPrompt) {
-            enhancedPromptOutput.value = "Please enter a basic prompt first.";
+            showFeedback('⚠️ Please enter a basic prompt first.', 'warning');
+            elements.basicPromptInput.focus();
             return;
         }
 
-        let enhancedParts = {
-            role: "",
-            coreTask: `🎯 Your primary task is to: ${basicPrompt}`, // Added emoji
-            context: "",
-            outputFormat: "",
-            tone: "",
-            constraints: "",
-            examples: "",
-            stepByStep: "",
-            modelSpecificInstructions: ""
+        // Build enhanced prompt parts
+        const parts = {
+            role: '',
+            coreTask: `🎯 **Core Task:**\n${basicPrompt}`,
+            context: '',
+            outputFormat: '',
+            tone: '',
+            constraints: '',
+            examples: '',
+            stepByStep: '',
+            modelInstructions: ''
         };
 
-        // 1. Apply General Enhancement Options
-        if (addRoleCheckbox.checked) {
-            const defaultRolePlaceholder = "[Specify Desired Role/Persona, e.g., 'an expert marketing strategist', 'a supportive coach']";
-            enhancedParts.role = `🎭 Act as ${customRoleText || defaultRolePlaceholder}.`; // Added emoji
+        // Add Role/Persona
+        if (elements.addRole.checked) {
+            const roleText = customRole || '[Specify your desired role, e.g., "an expert marketing strategist", "a creative writing mentor"]';
+            parts.role = `🎭 **Role:**\nYou are ${roleText}.`;
         }
 
-        if (addContextCheckbox.checked) {
-            enhancedParts.context = `ℹ️ Context:\n[Provide any necessary background information, data, current situation, or user profile here. E.g., "Target audience: beginners."]\n`; // Added emoji
+        // Add Context
+        if (elements.addContext.checked) {
+            parts.context = `ℹ️ **Context:**\n[Provide relevant background information, target audience, current situation, or any specific details the AI should know.]`;
         }
 
-        if (addFormatCheckbox.checked) {
-            enhancedParts.outputFormat = `📄 Output Format:\n[Specify the desired format, e.g., 'a bulleted list', 'a JSON object', 'a concise summary', 'a markdown table'].\n`; // Added emoji
+        // Add Output Format
+        if (elements.addFormat.checked) {
+            parts.outputFormat = `📄 **Desired Output Format:**\n[Specify format: bullet points, numbered list, markdown table, JSON, paragraph, code block, etc.]`;
         }
 
-        if (addToneCheckbox.checked) {
-            enhancedParts.tone = `🗣️ Tone:\n[Specify the desired tone, e.g., 'professional', 'friendly', 'witty', 'empathetic', 'neutral'].\n`; // Added emoji
+        // Add Tone
+        if (elements.addTone.checked) {
+            parts.tone = `🗣️ **Tone & Style:**\n[Specify: professional, casual, friendly, formal, humorous, empathetic, technical, etc.]`;
         }
 
-        if (addConstraintsCheckbox.checked) {
-            enhancedParts.constraints = `⚙️ Constraints & Guidelines:\n[Specify limitations or things to avoid. E.g., 'Do not use jargon.', 'Limit to 500 words.', 'Focus on practical advice.'].\n`; // Added emoji
+        // Add Constraints
+        if (elements.addConstraints.checked) {
+            parts.constraints = `⚙️ **Constraints & Guidelines:**\n• [Word/length limit if any]\n• [Topics or approaches to avoid]\n• [Specific requirements to follow]`;
         }
 
-        if (addExamplesCheckbox.checked) {
-            enhancedParts.examples = `💡 Examples (Optional - Illustrative):\n[If applicable, provide 1-2 concise examples. \nExample 1 Input: ... \nExample 1 Output: ...]\n`; // Added emoji
+        // Add Examples
+        if (elements.addExamples.checked) {
+            parts.examples = `💡 **Examples (Few-Shot Learning):**\n[Provide 1-2 examples of input/output pairs to guide the AI's response pattern.]`;
         }
 
-        if (addStepByStepCheckbox.checked) {
-            enhancedParts.stepByStep = `🚶‍♂️ Step-by-Step Guidance:\nThink step-by-step to ensure a comprehensive and logical response. Break down complex tasks.\n`; // Added emoji
+        // Add Step-by-Step
+        if (elements.addStepByStep.checked) {
+            parts.stepByStep = `🔢 **Approach:**\nPlease think through this step-by-step, breaking down complex aspects into manageable parts.`;
         }
 
-        // 2. Apply Model-Specific Enhancements
-        let modelInstructionPrefix = "🤖 Model Instructions:\n"; // Added emoji
-        switch (targetModel) {
-            case 'chatgpt':
-                enhancedParts.modelSpecificInstructions = `${modelInstructionPrefix}Please act as a helpful and knowledgeable assistant. Ensure your response is well-structured and directly addresses the user's core task within the provided context.`;
-                if (!enhancedParts.role && !customRoleText) { // Keep role logic
-                    enhancedParts.role = "🎭 You are a highly capable and helpful AI assistant.";
-                }
-                break;
-            case 'perplexity':
-                enhancedParts.modelSpecificInstructions = `${modelInstructionPrefix}Provide a fact-checked and well-researched response. If possible, cite credible sources or provide links. Focus on accuracy.`;
-                if (!basicPrompt.endsWith("?") && !basicPrompt.toLowerCase().startsWith("explain") && !basicPrompt.toLowerCase().startsWith("what is")) {
-                     enhancedParts.coreTask = `🎯 Your primary task is to find information about and explain: ${basicPrompt}`;
-                }
-                break;
-            case 'deepseek':
-                enhancedParts.modelSpecificInstructions = `${modelInstructionPrefix}Strive for technical depth and insightful analysis. Explore nuances and provide detailed explanations. If generating code, ensure it is efficient and well-documented.`;
-                break;
-            case 'claude':
-                enhancedParts.modelSpecificInstructions = `${modelInstructionPrefix}Focus on clarity, conciseness, and thoughtful communication. Demonstrate emotional intelligence. Structure your output for easy readability.`;
-                enhancedParts.constraints += (enhancedParts.constraints ? "\n" : "") + "Please ensure your response is helpful, harmless, and honest."; // This constraint can remain as it is
-                break;
-            case 'gemini':
-                enhancedParts.modelSpecificInstructions = `${modelInstructionPrefix}Aim for a comprehensive and creative response. Be informative and engaging.`;
-                break;
-            case 'code':
-                 if (!enhancedParts.role && !customRoleText) {
-                    enhancedParts.role = "🎭 Act as an expert programmer.";
-                }
-                enhancedParts.coreTask = `🎯 Your primary task is to generate code for: ${basicPrompt}`;
-                if (!addFormatCheckbox.checked && !enhancedParts.outputFormat) {
-                     enhancedParts.outputFormat = `📄 Output Format:\n[Specify programming language, libraries, expected functionality, e.g., 'Python script using 'requests' to fetch API data.']\n`;
-                }
-                enhancedParts.modelSpecificInstructions = `${modelInstructionPrefix}Produce clean, efficient, and well-commented code. Adhere to best practices.`;
-                break;
-            case 'general':
-            default:
-                enhancedParts.modelSpecificInstructions = `${modelInstructionPrefix}Please provide a comprehensive and helpful response.`;
-                break;
+        // Model-Specific Instructions
+        parts.modelInstructions = getModelInstructions(targetModel, parts, basicPrompt);
+
+        // Assemble final prompt
+        const finalPrompt = assemblePrompt(parts);
+
+        elements.enhancedPromptOutput.value = finalPrompt;
+        showFeedback('✨ Prompt enhanced successfully!', 'success');
+
+        // Animate the output
+        elements.enhancedPromptOutput.classList.add('pulse');
+        setTimeout(() => elements.enhancedPromptOutput.classList.remove('pulse'), 500);
+    };
+
+    const getModelInstructions = (model, parts, basicPrompt) => {
+        const instructions = {
+            chatgpt: `🤖 **AI Instructions (ChatGPT):**\nProvide a well-structured, comprehensive response. Be helpful and directly address the user's needs.`,
+
+            claude: `🤖 **AI Instructions (Claude):**\nFocus on clarity, accuracy, and thoughtful communication. Structure your response for easy readability. Be helpful, harmless, and honest.`,
+
+            gemini: `🤖 **AI Instructions (Gemini):**\nProvide a comprehensive, creative, and engaging response. Leverage your multimodal understanding where applicable.`,
+
+            perplexity: `🤖 **AI Instructions (Perplexity):**\nProvide fact-checked, well-researched information. Include citations or sources when possible. Focus on accuracy and reliability.`,
+
+            deepseek: `🤖 **AI Instructions (DeepSeek):**\nProvide technically detailed and insightful analysis. Explore nuances thoroughly. If generating code, ensure it's efficient and well-documented.`,
+
+            code: `🤖 **AI Instructions (Code Generation):**\nGenerate clean, efficient, well-commented code. Follow best practices and modern conventions. Include error handling where appropriate.`,
+
+            general: `🤖 **AI Instructions:**\nProvide a helpful, accurate, and well-organized response that fully addresses the request.`
+        };
+
+        // Special handling for code model
+        if (model === 'code' && !parts.role) {
+            parts.role = `🎭 **Role:**\nYou are an expert programmer with deep knowledge of software development best practices.`;
+            parts.coreTask = `🎯 **Core Task:**\nGenerate code for: ${basicPrompt}`;
         }
 
-        // 3. Assemble the Enhanced Prompt - MODIFIED SECTION
-        let finalPrompt = "";
-        if (enhancedParts.role) finalPrompt += enhancedParts.role + "\n\n";
-        
-        finalPrompt += enhancedParts.coreTask + "\n\n";
+        return instructions[model] || instructions.general;
+    };
 
-        // Combine all detail parts, adding a bit more space between them if they exist
-        if (enhancedParts.context) finalPrompt += enhancedParts.context + "\n";
-        if (enhancedParts.outputFormat) finalPrompt += enhancedParts.outputFormat + "\n";
-        if (enhancedParts.tone) finalPrompt += enhancedParts.tone + "\n";
-        if (enhancedParts.constraints) finalPrompt += enhancedParts.constraints + "\n";
-        if (enhancedParts.examples) finalPrompt += enhancedParts.examples + "\n";
-        
-        // Add a clear separation before guidance and model instructions if any details were added
-        if (enhancedParts.context || enhancedParts.outputFormat || enhancedParts.tone || enhancedParts.constraints || enhancedParts.examples) {
-            finalPrompt += "\n"; 
+    const assemblePrompt = (parts) => {
+        const sections = [];
+
+        if (parts.role) sections.push(parts.role);
+        sections.push(parts.coreTask);
+        if (parts.context) sections.push(parts.context);
+        if (parts.outputFormat) sections.push(parts.outputFormat);
+        if (parts.tone) sections.push(parts.tone);
+        if (parts.constraints) sections.push(parts.constraints);
+        if (parts.examples) sections.push(parts.examples);
+        if (parts.stepByStep) sections.push(parts.stepByStep);
+        if (parts.modelInstructions) sections.push(parts.modelInstructions);
+
+        return sections.join('\n\n---\n\n');
+    };
+
+    // ========================================
+    // Clipboard & Clear Functions
+    // ========================================
+    const copyToClipboard = async () => {
+        const text = elements.enhancedPromptOutput.value;
+
+        if (!text) {
+            showFeedback('📭 Nothing to copy yet!', 'warning');
+            return;
         }
 
-        if (enhancedParts.stepByStep) finalPrompt += enhancedParts.stepByStep + "\n";
-        if (enhancedParts.modelSpecificInstructions) finalPrompt += "\n" + enhancedParts.modelSpecificInstructions; // Add a newline before model instructions if stepbystep is also present
+        try {
+            await navigator.clipboard.writeText(text);
+            showFeedback('📋 Copied to clipboard!', 'success');
 
-        enhancedPromptOutput.value = finalPrompt.trim();
-        copyFeedback.textContent = ''; // Clear previous copy feedback
-    });
-
-    copyButton.addEventListener('click', () => {
-        if (enhancedPromptOutput.value) {
-            navigator.clipboard.writeText(enhancedPromptOutput.value)
-                .then(() => {
-                    copyFeedback.textContent = 'Copied to clipboard! ✅'; // Added emoji
-                    setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
-                })
-                .catch(err => {
-                    copyFeedback.textContent = 'Failed to copy. ❌'; // Added emoji
-                    console.error('Failed to copy text: ', err);
-                });
-        } else {
-            copyFeedback.textContent = 'Nothing to copy. 🤷'; // Added emoji
-            setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
+            // Button animation
+            elements.copyButton.classList.add('copied');
+            setTimeout(() => elements.copyButton.classList.remove('copied'), 1000);
+        } catch (err) {
+            console.error('Copy failed:', err);
+            showFeedback('❌ Failed to copy. Try selecting and copying manually.', 'error');
         }
-    });
+    };
+
+    const clearAll = () => {
+        elements.basicPromptInput.value = '';
+        elements.enhancedPromptOutput.value = '';
+        elements.customRoleInput.value = '';
+        updateCharCount();
+        showFeedback('🗑️ Cleared!', 'success');
+        elements.basicPromptInput.focus();
+    };
+
+    // ========================================
+    // Feedback Messages
+    // ========================================
+    const showFeedback = (message, type = 'info') => {
+        elements.copyFeedback.textContent = message;
+        elements.copyFeedback.className = `feedback-message ${type}`;
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            elements.copyFeedback.textContent = '';
+        }, 3000);
+    };
+
+    // ========================================
+    // Event Listeners
+    // ========================================
+    const initEventListeners = () => {
+        // Theme toggle
+        elements.themeToggle.addEventListener('click', toggleTheme);
+
+        // Character counter
+        elements.basicPromptInput.addEventListener('input', updateCharCount);
+
+        // Buttons
+        elements.enhanceButton.addEventListener('click', enhancePrompt);
+        elements.copyButton.addEventListener('click', copyToClipboard);
+        elements.clearButton.addEventListener('click', clearAll);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + Enter to enhance
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                enhancePrompt();
+            }
+
+            // Ctrl/Cmd + Shift + C to copy
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                copyToClipboard();
+            }
+        });
+    };
+
+    // ========================================
+    // Initialize Application
+    // ========================================
+    const init = () => {
+        initTheme();
+        initOptionChips();
+        initEventListeners();
+        updateCharCount();
+
+        // Initialize custom role visibility
+        toggleCustomRole(elements.addRole.checked);
+
+        console.log('✨ AI Prompt Enhancer initialized successfully!');
+    };
+
+    init();
 });

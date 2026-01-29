@@ -1,77 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Prompt Enhancer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>AI Prompt Enhancer | Transform Your Prompts</title>
+    <meta name="description"
+        content="Transform simple ideas into powerful, professional AI prompts tailored for ChatGPT, Claude, Gemini, and more.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons - Premium Icon Library -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>AI Prompt Enhancer ✨</h1>
-            <p class="tagline">Turn simple ideas into powerful, professional AI prompts.</p>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon-wrapper">
+                    <i data-lucide="sparkles" class="logo-icon"></i>
+                </div>
+                <h1>AI Prompt Enhancer</h1>
+            </div>
+            <p class="tagline">Transform simple ideas into powerful AI prompts</p>
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                <i data-lucide="moon" class="theme-icon" id="themeIconMoon"></i>
+                <i data-lucide="sun" class="theme-icon hidden" id="themeIconSun"></i>
+            </button>
         </header>
 
-        <main>
-            <section class="input-section">
-                <label for="basicPromptInput">Your Basic Prompt:</label>
-                <textarea id="basicPromptInput" rows="4" placeholder="e.g., write a story about a brave knight"></textarea>
-
-                <label for="aiModelSelector">Target AI Model:</label>
-                <select id="aiModelSelector">
-                    <option value="general">General Purpose</option>
-                    <option value="chatgpt">ChatGPT (OpenAI)</option>
-                    <option value="claude">Claude (Anthropic)</option>
-                    <option value="perplexity">Perplexity</option>
-                    <option value="deepseek">DeepSeek</option>
-                    <option value="gemini">Gemini (Google)</option>
-                    <option value="code">Code Generation</option>
-                </select>
-
-                <label>Enhancement Options:</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" id="addRole" checked> Add Role/Persona</label>
-                    <label><input type="checkbox" id="addContext" checked> Add Context</label>
-                    <label><input type="checkbox" id="addFormat" checked> Specify Output Format</label>
-                    <label><input type="checkbox" id="addTone" checked> Suggest Tone</label>
-                    <label><input type="checkbox" id="addConstraints" checked> Add Constraints</label>
-                    <label><input type="checkbox" id="addExamples"> Add Example Placeholder</label>
-                    <label><input type="checkbox" id="addStepByStep"> Encourage Step-by-Step</label>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="card input-card">
+                <div class="card-header">
+                    <i data-lucide="pen-line" class="card-icon"></i>
+                    <h2>Your Prompt</h2>
                 </div>
 
-                <div id="customRoleDiv" style="display: none; margin-top:10px;">
-                    <label for="customRoleInput">Custom Role (if 'Add Role' is checked):</label>
-                    <input type="text" id="customRoleInput" placeholder="e.g., expert travel blogger">
+                <div class="form-group">
+                    <label for="basicPromptInput">Enter your basic idea</label>
+                    <textarea id="basicPromptInput" rows="4"
+                        placeholder="e.g., write a story about a brave knight who discovers a hidden magical kingdom..."></textarea>
+                    <div class="char-counter">
+                        <span id="charCount">0</span> characters
+                    </div>
                 </div>
 
-                <button id="enhanceButton">✨ Enhance Prompt</button>
+                <div class="form-group">
+                    <label for="aiModelSelector">Target AI Model</label>
+                    <div class="select-wrapper">
+                        <select id="aiModelSelector">
+                            <option value="general">General Purpose</option>
+                            <option value="chatgpt">ChatGPT (OpenAI)</option>
+                            <option value="claude">Claude (Anthropic)</option>
+                            <option value="gemini">Gemini (Google)</option>
+                            <option value="perplexity">Perplexity</option>
+                            <option value="deepseek">DeepSeek</option>
+                            <option value="code">Code Generation</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Enhancement Options</label>
+                    <div class="options-grid">
+                        <label class="option-chip active">
+                            <input type="checkbox" id="addRole" checked>
+                            <i data-lucide="user-circle" class="chip-icon"></i>
+                            <span class="chip-text">Role/Persona</span>
+                        </label>
+                        <label class="option-chip active">
+                            <input type="checkbox" id="addContext" checked>
+                            <i data-lucide="info" class="chip-icon"></i>
+                            <span class="chip-text">Context</span>
+                        </label>
+                        <label class="option-chip active">
+                            <input type="checkbox" id="addFormat" checked>
+                            <i data-lucide="file-text" class="chip-icon"></i>
+                            <span class="chip-text">Output Format</span>
+                        </label>
+                        <label class="option-chip active">
+                            <input type="checkbox" id="addTone" checked>
+                            <i data-lucide="message-circle" class="chip-icon"></i>
+                            <span class="chip-text">Tone</span>
+                        </label>
+                        <label class="option-chip active">
+                            <input type="checkbox" id="addConstraints" checked>
+                            <i data-lucide="settings" class="chip-icon"></i>
+                            <span class="chip-text">Constraints</span>
+                        </label>
+                        <label class="option-chip">
+                            <input type="checkbox" id="addExamples">
+                            <i data-lucide="lightbulb" class="chip-icon"></i>
+                            <span class="chip-text">Examples</span>
+                        </label>
+                        <label class="option-chip">
+                            <input type="checkbox" id="addStepByStep">
+                            <i data-lucide="list-ordered" class="chip-icon"></i>
+                            <span class="chip-text">Step-by-Step</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="customRoleDiv" class="form-group custom-role-section">
+                    <label for="customRoleInput">Custom Role (Optional)</label>
+                    <input type="text" id="customRoleInput"
+                        placeholder="e.g., expert travel blogger, senior software engineer...">
+                </div>
+
+                <button id="enhanceButton" class="btn btn-primary">
+                    <i data-lucide="sparkles" class="btn-icon"></i>
+                    <span>Enhance Prompt</span>
+                    <span class="btn-shine"></span>
+                </button>
             </section>
 
-            <section class="output-section">
-                <label for="enhancedPromptOutput">Your Enhanced Prompt:</label>
-                <textarea id="enhancedPromptOutput" rows="10" readonly placeholder="Your enhanced prompt will appear here..."></textarea>
-                <button id="copyButton">📋 Copy to Clipboard</button>
-                <p id="copyFeedback" class="copy-feedback"></p>
+            <!-- Output Section -->
+            <section class="card output-card">
+                <div class="card-header">
+                    <i data-lucide="rocket" class="card-icon"></i>
+                    <h2>Enhanced Prompt</h2>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="enhancedPromptOutput" rows="12" readonly
+                        placeholder="Your enhanced, professional prompt will appear here after you click 'Enhance Prompt'..."></textarea>
+                </div>
+
+                <div class="output-actions">
+                    <button id="copyButton" class="btn btn-secondary">
+                        <i data-lucide="clipboard-copy" class="btn-icon"></i>
+                        <span>Copy to Clipboard</span>
+                    </button>
+                    <button id="clearButton" class="btn btn-ghost">
+                        <i data-lucide="trash-2" class="btn-icon"></i>
+                        <span>Clear</span>
+                    </button>
+                </div>
+
+                <p id="copyFeedback" class="feedback-message"></p>
             </section>
 
-            <section class="tips-section">
-                <h3>💡 How It Works & Tips</h3>
-                <p>This tool adds common prompt engineering structures to your basic idea. You'll still need to fill in the specifics in bracketed sections like <strong>[이렇게 하세요]</strong>.</p>
-                <ul>
-                    <li><strong>Be Specific:</strong> The more detail you provide in the placeholders, the better the AI's response.</li>
-                    <li><strong>Iterate:</strong> Try different enhanced prompts. See what works best for your target AI.</li>
-                    <li><strong>Model Differences:</strong> Some models respond better to certain structures.</li>
-                </ul>
+            <!-- Tips Section -->
+            <section class="card tips-card">
+                <div class="card-header">
+                    <i data-lucide="zap" class="card-icon"></i>
+                    <h2>Pro Tips</h2>
+                </div>
+                <div class="tips-content">
+                    <div class="tip-item">
+                        <div class="tip-icon-wrapper">
+                            <i data-lucide="brackets" class="tip-icon"></i>
+                        </div>
+                        <div class="tip-text">
+                            <strong>Fill in the brackets</strong>
+                            <p>Replace [placeholder text] with your specific details for best results.</p>
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon-wrapper">
+                            <i data-lucide="target" class="tip-icon"></i>
+                        </div>
+                        <div class="tip-text">
+                            <strong>Be Specific</strong>
+                            <p>The more detail you provide, the better the AI response will be.</p>
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon-wrapper">
+                            <i data-lucide="refresh-cw" class="tip-icon"></i>
+                        </div>
+                        <div class="tip-text">
+                            <strong>Iterate & Experiment</strong>
+                            <p>Try different combinations of options to find what works best.</p>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
 
-        <footer>
-            <p>© 2024 AI Prompt Enhancer. Built for learning and sharing.</p>
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <i data-lucide="heart" class="footer-icon"></i>
+                Built with love for the AI community
+            </p>
+            <p class="footer-sub">© 2024 AI Prompt Enhancer • Privacy-first, runs entirely in your browser</p>
         </footer>
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
 </body>
+
 </html>
